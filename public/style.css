@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Fruktur|Josefin+Sans|Shadows+Into+Light');
+body {
+  font-family: Josefin Sans;
+  background-color: #2C3E50;
+  color: #fff;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+.custom-margin {
+  margin-top: 5%;
+}
+.sizeing{
+  font-size: 1.5em;
+  margin-top: 2%;
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 10px;
+}

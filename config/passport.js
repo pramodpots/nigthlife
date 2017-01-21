@@ -1,7 +1,7 @@
 var passport = require('passport');
 var TwitterStrategy = require('passport-twitter').Strategy;
 var configAuth = require('./auth');
-var User = require("./userschema");
+var User = require("../userschema");
 
 	passport.serializeUser(function (user, done) {
 		done(null, user.id);
@@ -19,6 +19,7 @@ var User = require("./userschema");
 		callbackURL: configAuth.facebookAuth.callbackURL
 	},
 	function (token, refreshToken, profile, done) {
+		//console.log(profile)
 		process.nextTick(function () {
 			User.findOne({ 'account.id': profile.id }, function (err, user) {
 				if (err) {

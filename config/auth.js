@@ -2,8 +2,8 @@
 
 module.exports = {
 	'facebookAuth': {
-		'clientID': 'Gd9WEqUB7zWeKZE4PZUYHGp5b',
-		'clientSecret': 'uixsvdNwfG3WZyy4FCleW70dMcZEzVHbeJht0GKHEy8ypqJxHD',
+		'clientID': 'kgnjy1Cz8nQP1PrexTIsiHvBV',
+		'clientSecret': 'KxJdX8vmMRbkOPMt4GGfnv5Fd6NF3qA2X9OUK7ljhYZ0iD1rmi',
 		'callbackURL': 'https://nightlife-ppmakeitcount.c9users.io/auth/twitter/callback'
 	}
 };

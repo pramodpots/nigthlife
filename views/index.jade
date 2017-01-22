@@ -21,11 +21,29 @@ html
       .row
         .col-md-4.col-md-offset-4.col-xs-8.col-xs-offset-2.text-center
           .input-group.input-group-lg.custom-margin
-            input#search.form-control(type='text', placeholder='Where are you now?')
+            if searchterm
+              input#search.form-control(type='text', placeholder='Where are you now?', value="#{ searchterm }")
+            else
+              input#search.form-control(type='text', placeholder='Where are you now?')
             span.input-group-btn
               button#searchBtn.btn.btn-default(type='button')
                 i.fa.fa-search
       .row#restaurants
+      .row
+      if restos
+        each r in restos
+          form(action='/add/resto', method='post')
+            .media.col-md-8.col-md-offset-2.sizeing
+              .media-left
+                a(href='#')
+                  img.media-object(src= r.logo  , width='100px', height='100')
+              .media-body
+                h2.media-heading= r.name
+                p= r.cuisines
+              .media-right
+                input.hidden(type='text', value=r.resto_id, name='resto_id')
+                button.going.btn.btn-success(type='submit', style='width:100px; height:100px')
+                  span.count= r.going
     script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js')
     script(src='/homepage.js')

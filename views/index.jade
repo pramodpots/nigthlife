@@ -11,8 +11,11 @@ html
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
     .container-fluid.custom-margin
       .row
-        a.btn.btn-default(href='/login') login with twitter
-          i.fa.fa-twitter.fa-1x(aria-hidden='true')
+        if user
+          a.btn.btn-default(href='/logout')= user.account.username
+        else
+          a.btn.btn-default(href='/login') login with twitter
+            i.fa.fa-twitter.fa-1x(aria-hidden='true')
         .col-lg-8.col-lg-offset-2.text-center
           div
             p(style='font-size: 3em')
@@ -28,7 +31,6 @@ html
             span.input-group-btn
               button#searchBtn.btn.btn-default(type='button')
                 i.fa.fa-search
-      .row#restaurants
       .row
       if restos
         each r in restos
@@ -47,3 +49,4 @@ html
     script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js')
     script(src='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js')
     script(src='/homepage.js')
+    script(type='text/javascript')

@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 
 var restoSchema = new Schema({
     resto_id: {
-        type: String,
+        type: Number,
         required: true
     },
     customers: [],

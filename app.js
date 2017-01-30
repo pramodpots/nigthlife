@@ -37,6 +37,7 @@ app.use(session({
     }
 
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -72,48 +73,62 @@ app.use(function(req, res, next) {
 
 
 function updateResto(req, res, next) {
-    if(req.session.restos){
-    for (var i = 0; i < req.session.restos.length; i++) {
-        console.log("i = " + i);
-        Resto.findOne({
-            'resto_id': req.session.restos[i].resto_id
-        }, function(err, doc) {
-            console.log("req.session.restos[i]" + req.session.restos[i])
-            if (err) console.log(err);
-            if (doc) {
-                console.log(doc);
-            }
+    if (req.session.restos) {
+        Resto.find({}, function(err, doc) {
+            console.log(doc);
+            doc.forEach(function(d) {
+                req.session.restos.forEach(function(r) {
+                    if (r.resto_id == d.resto_id) {
+                        r.going = d.totalGoing;
+                        console.log("totalGoing updated");
+                    }
+                })
+            })
+            next();
         })
     }
-    return next();
-    }else{
-        return next();
-    }
+    /* 
+         Resto.find().forEach(function(doc) {
+             req.session.restos.forEach(function(r) {
+                 if (r.resto_id == doc.resto_id) {
+                     r.going = doc.totalGoing;
+                 }
+             })
+         },function(req,res,next){
+             return next();
+         })
+     }
+
+     else {
+         return next();
+     }*/
+
 }
 
 
 app.get('/', updateResto, function(req, res) {
-    console.log("searchterm" + req.session.restos)
-    console.log("login" + res.locals.login)
-    
-    if(req.session.restos){
-        
-    
-    res.render('index', {
-        restos: req.session.restos,
-        searchterm: req.session.search,
-        user: req.user
-    })
-    }else{
+    console.log("session: " + req.session.restos)
+    console.log("login: " + res.locals.login)
+
+    if (req.session.restos) {
+
+
+        res.render('index', {
+            restos: req.session.restos,
+            searchterm: req.session.search,
+            user: req.user
+        })
+    }
+    else {
         res.render('index');
     }
-    
+
 })
 
 app.get('/api/restos/:city', function(req, res) {
     var latitude, longitude;
     geocoder.geocode(req.params.city, function(err, result) {
-        console.log(result);
+        //console.log(result);
         req.session.search = req.params.city;
         latitude = result[0].latitude;
         longitude = result[0].longitude;
@@ -126,6 +141,7 @@ app.get('/api/restos/:city', function(req, res) {
                 var json = JSON.parse(result);
                 var data = json.nearby_restaurants
                 var resto = [];
+                var restoIdArr = [];
                 var going = 0;
                 data.forEach(function(r) {
                     going = 0;
@@ -154,75 +170,75 @@ app.get('/api/restos/:city', function(req, res) {
 })
 
 app.post('/add/resto', function(req, res) {
-    if (!res.locals.login) {
-        console.log("checkin auth");
-        res.redirect('/');
-    }
-    else {
-        console.log("body restoid: " + req.body.resto_id);
-        Resto.findOne({
-            'resto_id': req.body.resto_id
-        }, function(err, doc) {
-            if (err) {
-                console.error(err);
-                res.sendStatus('400')
-            }
+        if (!res.locals.login) {
+            //console.log("checkin auth");
+            res.redirect('/');
+        }
+        else {
+            console.log("body restoid: " + req.body.resto_id);
+            Resto.findOne({
+                'resto_id': req.body.resto_id
+            }, function(err, doc) {
+                if (err) {
+                    console.error(err);
+                    res.sendStatus('400')
+                }
 
-            else if (doc) {
-                if (doc.customers.indexOf(req.user._id) >= 0) {
-                    doc.totalGoing -= 1;
-                    doc.customers = doc.customers.filter(function(f) {
-                        f != req.user._id;
-                    });
-                    doc.save();
-                    req.session.restos.forEach(function(r) {
-                        if (r.resto_id == doc.resto_id) {
-                            r.going = doc.totalGoing;
-                            console.log("ssaved and incremented")
+                else if (doc) {
+                    if (doc.customers.indexOf(req.user._id) >= 0) {
+                        doc.totalGoing -= 1;
+                        doc.customers = doc.customers.filter(function(f) {
+                            f != req.user._id;
+                        });
+                        doc.save();
+                        req.session.restos.forEach(function(r) {
+                            if (r.resto_id == doc.resto_id) {
+                                r.going = doc.totalGoing;
+                                console.log("ssaved and decremented")
 
-                        }
-                    })
-                    res.redirect('/');
+                            }
+                        })
+                        res.redirect('/');
+                    }
+                    else {
+                        doc.totalGoing += 1;
+                        doc.customers.push(req.user._id);
+                        doc.save();
+                        req.session.restos.forEach(function(r) {
+                            if (r.resto_id == doc.resto_id) {
+                                r.going = doc.totalGoing;
+                                console.log("ssaved and incremented")
+                            }
+                        })
+
+                        res.redirect('/');
+                    }
+
                 }
                 else {
-                    doc.totalGoing += 1;
-                    doc.customers.push(req.user._id);
-                    doc.save();
-                    req.session.restos.forEach(function(r) {
-                        if (r.resto_id == doc.resto_id) {
-                            r.going = doc.totalGoing;
-                            console.log("ssaved and incremented")
-                        }
-                    })
+                    var newResto = new Resto();
+                    newResto.resto_id = req.body.resto_id
+                    newResto.customers.push(req.user._id)
+                    newResto.totalGoing = 1
 
-                    res.redirect('/');
+
+                    newResto.save(function(err) {
+                        if (err) {
+                            throw err;
+                        }
+                        req.session.restos.forEach(function(r) {
+                            if (r.resto_id == req.body.resto_id) {
+                                r.going = 1;
+                                console.log("added and incremented")
+                            }
+                        })
+                        res.redirect('/');
+                    });
                 }
-
-            }
-            else {
-                var newResto = new Resto();
-                newResto.resto_id = req.body.resto_id
-                newResto.customers.push(req.user._id)
-                newResto.totalGoing = 1
-
-
-                newResto.save(function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                    req.session.restos.forEach(function(r) {
-                        if (r.resto_id == req.body.resto_id) {
-                            r.going = 1;
-                            console.log("added and incremented")
-                        }
-                    })
-                    res.redirect('/');
-                });
-            }
-        });
-    }
-})
-// authentication
+            });
+        }
+    })
+    // authentication
 
 app.get('/login', passport.authenticate('twitter'));
 

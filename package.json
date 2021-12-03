@@ -15,7 +15,7 @@
     "express-session": "^1.14.2",
     "jade": "^1.11.0",
     "jquery": "^3.1.1",
-    "mongoose": "^4.7.7",
+    "mongoose": "~5.7.5",
     "node-geocoder": "^3.15.2",
     "passport": "^0.3.2",
     "passport-twitter": "^1.0.4",
